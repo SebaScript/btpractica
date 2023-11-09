@@ -4,10 +4,11 @@ import numpy as np
 
 MAQUINA = "X"
 HUMANO = "O"
+CELDA_VACIA = "_"
 INF = float('inf')
 TAM_TABLERO = 4
 
-tablero = np.full((TAM_TABLERO, TAM_TABLERO), "_")
+tablero = np.full((TAM_TABLERO, TAM_TABLERO), CELDA_VACIA)
 
 
 def buscar_celdas_vacias(tablero_actual):
@@ -32,9 +33,9 @@ def hay_ganador(tablero_actual, jugador):
 def evaluar(tablero_actual):
     puntaje = 0
     if hay_ganador(tablero, MAQUINA) and not hay_ganador(tablero, HUMANO):
-        puntaje += 10
+        puntaje += INF
     elif not hay_ganador(tablero, MAQUINA) and hay_ganador(tablero, HUMANO):
-        puntaje -= 10
+        puntaje -= INF
 
     return puntaje
 
@@ -43,16 +44,13 @@ def mejor_jugada(tablero_actual):
     max_eval = -INF
     alpha = -INF
     beta = INF
-    PROFUNDIDAD_MAXIMA = 4
 
     celdas_vacias = buscar_celdas_vacias(tablero_actual)
 
-    mejor_mov = celdas_vacias[0] if celdas_vacias else None
-
     for celda in celdas_vacias:
         tablero_actual[celda[0]][celda[1]] = MAQUINA
-        eval = minimax(tablero_actual, HUMANO, alpha, beta, PROFUNDIDAD_MAXIMA)
-        tablero_actual[celda[0]][celda[1]] = "_"
+        eval = minimax(tablero_actual, HUMANO, alpha, beta, 5)
+        tablero_actual[celda[0]][celda[1]] = CELDA_VACIA
         if eval > max_eval:
             max_eval = eval
             mejor_mov = celda
@@ -71,11 +69,12 @@ def minimax(tablero_actual, jugador, alpha, beta, profundidad):
         for celda in celdas_vacias:
             tablero_actual[celda[0]][celda[1]] = MAQUINA
             eval = minimax(tablero_actual, HUMANO, alpha, beta, profundidad - 1)
-            tablero_actual[celda[0]][celda[1]] = "_"
+            tablero_actual[celda[0]][celda[1]] = CELDA_VACIA
             max_eval = max(max_eval, eval)
             alpha = max(alpha, eval)
             if alpha >= beta:
                 break
+
         return max_eval
 
     else:
@@ -83,7 +82,7 @@ def minimax(tablero_actual, jugador, alpha, beta, profundidad):
         for celda in celdas_vacias:
             tablero_actual[celda[0]][celda[1]] = HUMANO
             eval = minimax(tablero_actual, MAQUINA, alpha, beta, profundidad - 1)
-            tablero_actual[celda[0]][celda[1]] = "_"
+            tablero_actual[celda[0]][celda[1]] = CELDA_VACIA
             min_eval = min(min_eval, eval)
             beta = min(beta, eval)
             if alpha >= beta:
@@ -92,7 +91,6 @@ def minimax(tablero_actual, jugador, alpha, beta, profundidad):
         return min_eval
 
 
-print("TRIQUI")
 for fila in tablero:
     print("  ".join(fila))
 while True:
@@ -142,14 +140,12 @@ while True:
         maquina_fila, maquina_columna = mejor_jugada(tablero)
         tablero[maquina_fila][maquina_columna] = MAQUINA
 
-        # Verificar si la máquina ha ganado
         if hay_ganador(tablero, MAQUINA):
             print("MAQUINA >>>> HUMANO\n")
             for fila in tablero:
                 print("  ".join(fila))
             break
 
-        # Verificar si hay empate
         if len(buscar_celdas_vacias(tablero)) == 0:
             print("EMPATE\n")
             for fila in tablero:
