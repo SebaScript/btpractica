@@ -32,18 +32,18 @@ def hay_ganador(tablero_actual, jugador):
 def evaluar(tablero_actual):
     puntaje = 0
     if hay_ganador(tablero, MAQUINA) and not hay_ganador(tablero, HUMANO):
-        puntaje += 10  # La máquina tiene un patrón "L" y el jugador no.
+        puntaje += 10
     elif not hay_ganador(tablero, MAQUINA) and hay_ganador(tablero, HUMANO):
-        puntaje -= 10  # El jugador tiene un patrón "L" y la máquina no.
+        puntaje -= 10
 
     return puntaje
 
 
 def mejor_jugada(tablero_actual):
-    mejor_eval = -INF
+    max_eval = -INF
     alpha = -INF
     beta = INF
-    PROFUNDIDAD_MAXIMA = 2
+    PROFUNDIDAD_MAXIMA = 4
 
     celdas_vacias = buscar_celdas_vacias(tablero_actual)
 
@@ -52,11 +52,9 @@ def mejor_jugada(tablero_actual):
     for celda in celdas_vacias:
         tablero_actual[celda[0]][celda[1]] = MAQUINA
         eval = minimax(tablero_actual, HUMANO, alpha, beta, PROFUNDIDAD_MAXIMA)
-        print(eval)
         tablero_actual[celda[0]][celda[1]] = "_"
-        if eval >= mejor_eval:
-            print((eval, mejor_eval))
-            mejor_eval = eval
+        if eval > max_eval:
+            max_eval = eval
             mejor_mov = celda
 
     return mejor_mov
